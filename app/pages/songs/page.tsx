@@ -29,9 +29,7 @@ export default function SongsScreen() {
   }, []);
 
   useEffect(() => {
-    if(!audio?.src) {
-      return;
-    }
+
     if (currentAudio) {
       const filteredAudio = currentAudio.find((track) => track.type === "corte");
   
@@ -57,7 +55,7 @@ export default function SongsScreen() {
         audio.src = "";
       }
     };
-  }, [currentAudio, audio]); 
+  }, [currentAudio]); 
   
 
   const handleAudioPlay = (track: Track[]) => {
