@@ -29,16 +29,19 @@ export default function SongsScreen() {
   }, []);
 
   useEffect(() => {
+    if(!audio?.src) {
+      return;
+    }
     if (currentAudio) {
       const filteredAudio = currentAudio.find((track) => track.type === "corte");
-
+  
       if (filteredAudio) {
         // Pausa o áudio atual (se houver) antes de tocar o novo áudio
         if (audio) {
           audio.pause();
           audio.src = "";
         }
-
+  
         const backgroundAudio = new Audio(filteredAudio.publicUrl);
         backgroundAudio.loop = true;
         backgroundAudio.volume = 0.2;
@@ -46,7 +49,7 @@ export default function SongsScreen() {
         backgroundAudio.play(); // Toca o áudio assim que é configurado
       }
     }
-
+  
     return () => {
       // Pausar e limpar o áudio quando o componente for desmontado ou mudar a faixa
       if (audio) {
@@ -54,7 +57,8 @@ export default function SongsScreen() {
         audio.src = "";
       }
     };
-  }, [currentAudio, audio]);
+  }, [currentAudio, audio]); 
+  
 
   const handleAudioPlay = (track: Track[]) => {
     setCurrentAudio(track); // Atualiza o estado com a faixa central
