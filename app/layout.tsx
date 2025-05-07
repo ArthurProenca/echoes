@@ -4,7 +4,9 @@ import "./globals.css";
 
 const Jersey10 = Jersey_10({
   variable: "--font-jersey-10",
-  weight: "400"
+  weight: "400",
+  subsets: ["latin"]
+
 });
 
 const InstrumentSans = Instrument_Sans({
