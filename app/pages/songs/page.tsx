@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import SongsClient from "@/app/client/lambda/songs/songs_client";
@@ -52,7 +54,7 @@ export default function SongsScreen() {
         audio.src = "";
       }
     };
-  }, [currentAudio]);
+  }, [currentAudio, audio]);
 
   const handleAudioPlay = (track: Track[]) => {
     setCurrentAudio(track); // Atualiza o estado com a faixa central
