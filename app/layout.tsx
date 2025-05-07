@@ -9,7 +9,8 @@ const Jersey10 = Jersey_10({
 
 const InstrumentSans = Instrument_Sans({
   weight: "400",
-  variable: "--font-instrument-sans"
+  variable: "--font-instrument-sans",
+  subsets: ["latin"]
 });
 
 export const metadata: Metadata = {
