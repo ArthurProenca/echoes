@@ -5,14 +5,15 @@ import SingButton from "@/app/components/sing_button";
 import SongPlayer from "@/app/components/song_player";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function PreviewSong() {
+function PreviewSongPage() {
   const searchParams = useSearchParams();
   const dataParamRaw = searchParams.get("data");
   const coverPublicUrl = searchParams.get("publicUrl");
   const artist = searchParams.get("artistName");
   const songName = searchParams.get("songName");
-  console.log(dataParamRaw)
+  console.log(dataParamRaw);
   if (!dataParamRaw || !coverPublicUrl) {
     return <main>Holly molly u fucked up</main>;
   }
@@ -72,5 +73,13 @@ Baby, no chance
       </aside>
       <SongPlayer url={dataParam.publicUrl} />
     </main>
+  );
+}
+
+export default function PreviewSong() {
+  return (
+    <Suspense>
+      <PreviewSongPage />
+    </Suspense>
   );
 }
