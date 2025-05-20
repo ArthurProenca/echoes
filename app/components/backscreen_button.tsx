@@ -1,13 +1,20 @@
-'use client'
+"use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { usePlayer } from "../context/player_context";
 
 export default function BackscreenButton() {
   const router = useRouter();
+  const { setUrl } = usePlayer();
+
+  const handleClick = () => {
+    setUrl("smile!");
+    router.back();
+  };
 
   return (
     <button
-      onClick={() => router.push("/")}
+      onClick={handleClick}
       className="flex flex-row items-center w-full gap-5 opacity-45"
     >
       <Image width={17} height={33} alt="" src="/back_arrow.svg" unoptimized />

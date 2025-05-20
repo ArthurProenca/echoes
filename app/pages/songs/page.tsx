@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import SongCover from "../../components/song_cover";
 import SongTitle from "../../components/song_title";
-import SongPlayer from "@/app/components/song_player";
+import { usePlayer } from "@/app/context/player_context";
 
 async function getAllSongsInfo(): Promise<MusicLibrary> {
   const client = new SongsClient();
@@ -15,27 +15,8 @@ async function getAllSongsInfo(): Promise<MusicLibrary> {
 export default function SongsScreen() {
   const [songInfos, setSongInfos] = useState<MusicLibrary>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [userInteracted, setUserInteracted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  function handleClick(direction: string) {
-    function next() {
-      setCurrentIndex((prev) => (prev + 1) % allSongs.length);
-    }
-
-    function prev() {
-      setCurrentIndex((prev) => (prev - 1 + allSongs.length) % allSongs.length);
-    }
-
-    switch (direction) {
-      case "left":
-        prev();
-        break;
-      case "right":
-        next();
-        break;
-    }
-  }
+  const { setUrl } = usePlayer();
 
   async function loadSongs() {
     const data = await getAllSongsInfo();
@@ -47,20 +28,34 @@ export default function SongsScreen() {
     loadSongs();
   }, []);
 
-  if (!songInfos) return null;
-
-  const allSongs = songInfos.artists.flatMap((artist) =>
-    artist.albums.map((song) => ({
-      ...song,
-      artistName: artist.name,
-    }))
-  );
+  const allSongs =
+    songInfos?.artists.flatMap((artist) =>
+      artist.albums.map((song) => ({
+        ...song,
+        artistName: artist.name,
+      }))
+    ) ?? [];
 
   const visibleSongs = [
-    allSongs[(currentIndex - 1 + allSongs.length) % allSongs.length], // left
-    allSongs[currentIndex], // center
-    allSongs[(currentIndex + 1) % allSongs.length], // right
+    allSongs[(currentIndex - 1 + allSongs.length) % allSongs.length],
+    allSongs[currentIndex],
+    allSongs[(currentIndex + 1) % allSongs.length],
   ];
+
+  useEffect(() => {
+    if (visibleSongs[1]?.tracks?.[0]?.publicUrl) {
+      setUrl(visibleSongs[1].tracks[0].publicUrl);
+    }
+  }, [currentIndex]);
+
+  function handleClick(direction: string) {
+    if (direction === "left") {
+      setCurrentIndex((prev) => (prev - 1 + allSongs.length) % allSongs.length);
+    } else if (direction === "right") {
+      setCurrentIndex((prev) => (prev + 1) % allSongs.length);
+    }
+  }
+
   if (isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -71,18 +66,7 @@ export default function SongsScreen() {
       </main>
     );
   }
-  if (!userInteracted) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <button
-          onClick={() => setUserInteracted(true)}
-        >
-                OII
 
-        </button>
-      </main>
-    );
-  }
   return (
     <main className="min-h-screen flex flex-col items-center justify-start relative">
       <section>
@@ -90,26 +74,19 @@ export default function SongsScreen() {
       </section>
 
       <article className="w-full flex-grow items-center">
-        <section className="flex flex-row justify-center items-center">
+        <section className="flex flex-row justify-center items-center gap-4 mb-4">
           {visibleSongs.map((song, idx) => {
-            let position = "";
-
-            if (idx == 0) {
-              position = "left";
-            } else if (idx == 1) {
-              position = "center";
-            } else {
-              position = "right";
-            }
+            const isCenter = idx === 1;
+            let position = isCenter ? "center" : idx === 0 ? "left" : "right";
             return (
               <button
-                className="relative"
-                key={idx}
+                className={isCenter ? "song-center" : "song-side"}
+                key={song.name + currentIndex} 
                 onClick={() => handleClick(position)}
               >
                 <SongCover
                   id={idx}
-                  isCenter={idx == 1}
+                  isCenter={isCenter}
                   name={song.name}
                   artist={song.artistName}
                   publicUrl={song.cover.publicUrl}
@@ -120,7 +97,7 @@ export default function SongsScreen() {
           })}
         </section>
 
-        <section className="w-full h-50">
+        <section className="w-full h-36">
           <Image
             width={1}
             height={1}
@@ -131,12 +108,12 @@ export default function SongsScreen() {
           />
         </section>
 
-        <section className="flex flex-row justify-center items-center gap-65">
+        <section className="flex flex-row justify-center items-center gap-24 mt-6">
           {visibleSongs.map((song, idx) => {
             const isCenter = idx === 1;
             return (
               <SongTitle
-                key={idx}
+                key={song.name + currentIndex} 
                 id={idx}
                 artist={song.artistName}
                 isCenter={isCenter}
@@ -146,8 +123,6 @@ export default function SongsScreen() {
           })}
         </section>
       </article>
-      <SongPlayer key={visibleSongs[1].tracks[0].publicUrl} url={visibleSongs[1].tracks[0].publicUrl} />
-
     </main>
   );
 }

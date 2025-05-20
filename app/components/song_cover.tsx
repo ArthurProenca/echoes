@@ -17,7 +17,9 @@ export default function SongCover(props: SongCoverType) {
     router.push(
       `/pages/preview?data=${encodeURIComponent(
         JSON.stringify(track)
-      )}&publicUrl=${encodeURIComponent(publicUrl)}&artistName=${props.artist}&songName=${props.name}`
+      )}&publicUrl=${encodeURIComponent(publicUrl)}&artistName=${
+        props.artist
+      }&songName=${props.name}`
     );
   }
 
@@ -26,14 +28,15 @@ export default function SongCover(props: SongCoverType) {
       key={props.id}
       className={`rounded-full max-w-[500px] max-h-[500px] transition-all duration-300 cursor-pointer focus:outline-none ${
         props.isCenter
-          ? "z-2 -mr-12 -ml-12"
-          : "opacity-40 blur-[2px] z-1 w-[270px] h-[270px]"
+          ? "z-20 -mr-12 -ml-12"
+          : "opacity-40 blur-[2px] z-10 w-[270px] h-[270px]"
       }`}
       style={{
         padding: 0,
         border: "none",
         background: "transparent",
         cursor: props.isCenter ? "default" : "pointer",
+        position: "relative", 
       }}
     >
       <Image
