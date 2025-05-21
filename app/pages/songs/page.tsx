@@ -2,10 +2,11 @@
 
 import SongsClient from "@/app/client/lambda/songs/songs_client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SongCover from "../../components/song_cover";
 import SongTitle from "../../components/song_title";
 import { usePlayer } from "@/app/context/player_context";
+import { useSongs } from "@/app/context/songs_context";
 
 async function getAllSongsInfo(): Promise<MusicLibrary> {
   const client = new SongsClient();
@@ -15,7 +16,7 @@ async function getAllSongsInfo(): Promise<MusicLibrary> {
 export default function SongsScreen() {
   const [songInfos, setSongInfos] = useState<MusicLibrary>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { currentIndex, setCurrentIndex } = useSongs();
   const { setUrl } = usePlayer();
 
   async function loadSongs() {
@@ -28,25 +29,31 @@ export default function SongsScreen() {
     loadSongs();
   }, []);
 
-  const allSongs =
-    songInfos?.artists.flatMap((artist) =>
-      artist.albums.map((song) => ({
-        ...song,
-        artistName: artist.name,
-      }))
-    ) ?? [];
+  const allSongs = useMemo(() => {
+    return (
+      songInfos?.artists.flatMap((artist) =>
+        artist.albums.map((song) => ({
+          ...song,
+          artistName: artist.name,
+        }))
+      ) ?? []
+    );
+  }, [songInfos]);
 
-  const visibleSongs = [
-    allSongs[(currentIndex - 1 + allSongs.length) % allSongs.length],
-    allSongs[currentIndex],
-    allSongs[(currentIndex + 1) % allSongs.length],
-  ];
+  const visibleSongs = useMemo(
+    () => [
+      allSongs[(currentIndex - 1 + allSongs.length) % allSongs.length],
+      allSongs[currentIndex],
+      allSongs[(currentIndex + 1) % allSongs.length],
+    ],
+    [currentIndex, allSongs]
+  );
 
   useEffect(() => {
     if (visibleSongs[1]?.tracks?.[0]?.publicUrl) {
       setUrl(visibleSongs[1].tracks[0].publicUrl);
     }
-  }, [currentIndex]);
+  }, [visibleSongs, setUrl]);
 
   function handleClick(direction: string) {
     if (direction === "left") {
@@ -77,11 +84,11 @@ export default function SongsScreen() {
         <section className="flex flex-row justify-center items-center gap-4 mb-4">
           {visibleSongs.map((song, idx) => {
             const isCenter = idx === 1;
-            let position = isCenter ? "center" : idx === 0 ? "left" : "right";
+            const position = isCenter ? "center" : idx === 0 ? "left" : "right";
             return (
               <button
                 className={isCenter ? "song-center" : "song-side"}
-                key={song.name + currentIndex} 
+                key={song.name + currentIndex}
                 onClick={() => handleClick(position)}
               >
                 <SongCover
@@ -108,12 +115,12 @@ export default function SongsScreen() {
           />
         </section>
 
-        <section className="flex flex-row justify-center items-center gap-24 mt-6">
+        <section className="flex flex-row justify-center-safe items-center gap-24 mt-6">
           {visibleSongs.map((song, idx) => {
             const isCenter = idx === 1;
             return (
               <SongTitle
-                key={song.name + currentIndex} 
+                key={song.name + currentIndex}
                 id={idx}
                 artist={song.artistName}
                 isCenter={isCenter}

@@ -8,7 +8,7 @@ export default function BackscreenButton() {
   const { setUrl } = usePlayer();
 
   const handleClick = () => {
-    setUrl("smile!");
+    setUrl("stop");
     router.back();
   };
 

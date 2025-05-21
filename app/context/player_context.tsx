@@ -19,7 +19,11 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
   const setUrl = (newUrl: string) => {
     if (!audioRef.current || !newUrl) return;
-
+    
+    if (newUrl == "stop") {
+      audioRef.current.pause();
+      return;
+    }
     audioRef.current.src = newUrl;
     audioRef.current.load();
 

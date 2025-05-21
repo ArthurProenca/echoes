@@ -2,11 +2,9 @@
 
 import BackscreenButton from "@/app/components/backscreen_button";
 import SingButton from "@/app/components/sing_button";
-import SongPlayer from "@/app/components/song_player";
-import { usePlayer } from "@/app/context/player_context";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 
 function PreviewSongPage() {
   const searchParams = useSearchParams();
@@ -14,17 +12,10 @@ function PreviewSongPage() {
   const coverPublicUrl = searchParams.get("publicUrl");
   const artist = searchParams.get("artistName");
   const songName = searchParams.get("songName");
-  const { setUrl } = usePlayer();
 
-  if (!dataParamRaw || !coverPublicUrl) {
-    return <main>Holly molly u fucked up</main>;
+  if (!dataParamRaw || !coverPublicUrl || !artist || !songName) {
+    return <div>Eita</div>;
   }
-
-  useEffect(() => {
-    setUrl(dataParam.publicUrl);
-  }, []);
-
-  const dataParam: Track = JSON.parse(decodeURIComponent(dataParamRaw));
 
   const rawLyrics = `
 Baby, you can find me under the lights
@@ -43,7 +34,6 @@ Baby, no chance
 
   return (
     <main className="max-h-screen flex flex-row items-center justify-between relative overflow-hidden p-14">
-
       <aside
         className="w-[52%] pb-10 -ml-60 animate-spin "
         style={{ animationDuration: "7s" }}
