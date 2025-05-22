@@ -2,18 +2,19 @@
 
 import BackscreenButton from "@/app/components/backscreen_button";
 import SingButton from "@/app/components/sing_button";
+import { usePlayer } from "@/app/context/player_context";
+import { useSelectedSong } from "@/app/context/selected_song_context";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 
 function PreviewSongPage() {
-  const searchParams = useSearchParams();
-  const dataParamRaw = searchParams.get("data");
-  const coverPublicUrl = searchParams.get("publicUrl");
-  const artist = searchParams.get("artistName");
-  const songName = searchParams.get("songName");
+  const { currentSongCoverUrl, currentSongArtistName, currentSongName } =
+    useSelectedSong();
+  const { setUrl } = usePlayer();
+  const router = useRouter();
 
-  if (!dataParamRaw || !coverPublicUrl || !artist || !songName) {
+  if (!currentSongCoverUrl || !currentSongArtistName || !currentSongName) {
     return <div>Eita</div>;
   }
 
@@ -32,6 +33,11 @@ Baby, no chance
 `;
   const formatted = rawLyrics.replace(/([a-z])([A-Z])/g, "$1\n$2");
 
+  const handleClick = () => {
+    setUrl("stop");
+    router.push(`/pages/echoes`);
+  };
+
   return (
     <main className="max-h-screen flex flex-row items-center justify-between relative overflow-hidden p-14">
       <aside
@@ -40,7 +46,7 @@ Baby, no chance
       >
         <Image
           alt={""}
-          src={coverPublicUrl}
+          src={currentSongCoverUrl}
           width={20}
           height={20}
           className="w-full h-full object-cover rounded-full"
@@ -53,10 +59,10 @@ Baby, no chance
         </section>
         <section className="w-full flex flex-col self-end-safe justify-end-safe text-end">
           <span className="w-full self-center text-9xl uppercase font-jersey text-end">
-            {songName}
+            {currentSongName}
           </span>
           <span className="w-full self-center text-5xl uppercase font-jersey text-end">
-            {artist}
+            {currentSongArtistName}
           </span>
         </section>
         <section className="w-full">
@@ -64,7 +70,10 @@ Baby, no chance
             {formatted}
           </p>
         </section>
-        <section className=" w-full flex self-end-safe justify-end-safe">
+        <section
+          onClick={handleClick}
+          className=" w-full flex self-end-safe justify-end-safe"
+        >
           <SingButton />
         </section>
       </aside>

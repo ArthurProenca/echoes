@@ -84,6 +84,7 @@ export default function SongsScreen() {
         <section className="flex flex-row justify-center items-center gap-4 mb-4">
           {visibleSongs.map((song, idx) => {
             const isCenter = idx === 1;
+
             const position = isCenter ? "center" : idx === 0 ? "left" : "right";
             return (
               <button
@@ -98,6 +99,7 @@ export default function SongsScreen() {
                   artist={song.artistName}
                   publicUrl={song.cover.publicUrl}
                   tracks={song.tracks}
+                  gif={song?.gif?.publicUrl}
                 />
               </button>
             );

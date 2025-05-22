@@ -4,6 +4,7 @@ import "./globals.css";
 import { PlayerProvider } from "./context/player_context";
 import GlobalPlayer from "./components/global_song_player";
 import { SongsProvider } from "./context/songs_context";
+import { SelectedSongsProvider } from "./context/selected_song_context";
 
 const Jersey10 = Jersey_10({
   variable: "--font-jersey-10",
@@ -33,7 +34,11 @@ export default function RootLayout({
         className={`${Jersey10.variable} ${InstrumentSans.variable} antialiased`}
       >
         <PlayerProvider>
-          <SongsProvider>{children}</SongsProvider>
+          <SongsProvider>
+            <SelectedSongsProvider>
+              {children}
+            </SelectedSongsProvider>
+          </SongsProvider>
           <GlobalPlayer />
         </PlayerProvider>
       </body>

@@ -2,10 +2,18 @@
 import { SongCoverType } from "@/app/types/song_cover_type";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useSelectedSong } from "../context/selected_song_context";
 
 export default function SongCover(props: SongCoverType) {
   const router = useRouter();
-
+  const {
+    setCurrentSongCoverUrl,
+    setCurrentSongDemoUrl,
+    setCurrentSongGifUrl,
+    setCurrentSongUrl,
+    setCurrentSongArtistName,
+    setCurrentSongName
+  } = useSelectedSong();
   const shortTrack = props.tracks.find((track) => track.type === "corte");
 
   if (!shortTrack) {
@@ -14,12 +22,21 @@ export default function SongCover(props: SongCoverType) {
 
   function goToPreviewPage(tracks: Track[], publicUrl: string) {
     const track = tracks.find((track) => track.type === "corte");
+    const instrumentalTrack = tracks.find(
+      (track) => track.type === "instrumental"
+    );
+    if (!instrumentalTrack || !track) {
+      return;
+    }
+
+    setCurrentSongCoverUrl(publicUrl);
+    setCurrentSongGifUrl(props.gif);
+    setCurrentSongUrl(instrumentalTrack.publicUrl);
+    setCurrentSongDemoUrl(track?.publicUrl);
+    setCurrentSongArtistName(props.artist);
+    setCurrentSongName(props.name);
     router.push(
-      `/pages/preview?data=${encodeURIComponent(
-        JSON.stringify(track)
-      )}&publicUrl=${encodeURIComponent(publicUrl)}&artistName=${
-        props.artist
-      }&songName=${props.name}`
+      `/pages/preview`
     );
   }
 
@@ -36,7 +53,7 @@ export default function SongCover(props: SongCoverType) {
         border: "none",
         background: "transparent",
         cursor: props.isCenter ? "default" : "pointer",
-        position: "relative", 
+        position: "relative",
       }}
     >
       <Image

@@ -18,10 +18,15 @@ declare global {
     type: string;
   }
 
+  interface Gif {
+    publicUrl : string;
+  }
+
   interface Album {
     name: string;
     cover: Cover;
     tracks: Track[];
+    gif: Gif;
   }
 
   interface Artist {
