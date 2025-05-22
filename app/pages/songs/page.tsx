@@ -84,15 +84,14 @@ export default function SongsScreen() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xl text-purple-600">Carregando...</span>
+          <Image width={40} height={40} alt="" src="/main_page_icon.svg" className="animate-spin" />
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start relative">
+    <main className="min-h-screen flex flex-col items-center justify-start relative bg-custom-radial">
       <section>
         <h1 className="pt-12 pb-8 text-6xl font-jersey">ECHOES</h1>
       </section>

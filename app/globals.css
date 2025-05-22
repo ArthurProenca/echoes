@@ -32,3 +32,12 @@ body {
 .font-instrument-sans {
   font-family: var(--font-instrument-sans), sans-serif;
 }
+
+.bg-custom-radial {
+  background: radial-gradient(
+    58.2% 58.2% at 49.2% 41.8%, 
+    #250B27 0%, 
+    #140818 46.64%, 
+    #04050A 100%
+  );
+}

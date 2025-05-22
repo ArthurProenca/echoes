@@ -22,7 +22,7 @@ const InstrumentSans = Instrument_Sans({
 export const metadata: Metadata = {
   title: "Echoes",
   description: "Bring light to your voice!",
-  icons: "/main_page_icon.svg"
+  icons: "/main_page_icon.svg",
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body
-        className={`${Jersey10.variable} ${InstrumentSans.variable} antialiased`}
+        className={`${Jersey10.variable} ${InstrumentSans.variable} antialiased `}
       >
         <PlayerProvider>
           <SongsProvider>

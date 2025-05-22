@@ -39,7 +39,7 @@ Baby, no chance
   };
 
   return (
-    <main className="max-h-screen flex flex-row items-center justify-between relative overflow-hidden p-14">
+    <main className="max-h-screen flex flex-row items-center justify-between relative overflow-hidden p-14 bg-custom-radial" >
       <aside
         className="w-[52%] pb-10 -ml-60 animate-spin "
         style={{ animationDuration: "7s" }}
@@ -58,7 +58,7 @@ Baby, no chance
           <BackscreenButton />
         </section>
         <section className="w-full flex flex-col self-end-safe justify-end-safe text-end">
-          <span className="w-full self-center text-9xl uppercase font-jersey text-end">
+          <span className="w-full self-center text-8xl uppercase font-jersey text-end">
             {currentSongName}
           </span>
           <span className="w-full self-center text-5xl uppercase font-jersey text-end">
