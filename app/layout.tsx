@@ -5,6 +5,7 @@ import { PlayerProvider } from "./context/player_context";
 import GlobalPlayer from "./components/global_song_player";
 import { SongsProvider } from "./context/songs_context";
 import { SelectedSongsProvider } from "./context/selected_song_context";
+import { ThemesProvider } from "./context/theme_context";
 
 const Jersey10 = Jersey_10({
   variable: "--font-jersey-10",
@@ -21,6 +22,7 @@ const InstrumentSans = Instrument_Sans({
 export const metadata: Metadata = {
   title: "Echoes",
   description: "Bring light to your voice!",
+  icons: "/main_page_icon.svg"
 };
 
 export default function RootLayout({
@@ -36,7 +38,7 @@ export default function RootLayout({
         <PlayerProvider>
           <SongsProvider>
             <SelectedSongsProvider>
-              {children}
+              <ThemesProvider>{children}</ThemesProvider>
             </SelectedSongsProvider>
           </SongsProvider>
           <GlobalPlayer />

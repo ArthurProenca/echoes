@@ -17,9 +17,33 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     audioRef.current = new Audio();
   }, []);
 
+  useEffect(() => {
+    audioRef.current = new Audio();
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+
+    const handlePopState = () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
   const setUrl = (newUrl: string) => {
     if (!audioRef.current || !newUrl) return;
-    
+
     if (newUrl == "stop") {
       audioRef.current.pause();
       return;

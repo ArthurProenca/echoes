@@ -7,6 +7,7 @@ import SongCover from "../../components/song_cover";
 import SongTitle from "../../components/song_title";
 import { usePlayer } from "@/app/context/player_context";
 import { useSongs } from "@/app/context/songs_context";
+import { useTheme } from "@/app/context/theme_context";
 
 async function getAllSongsInfo(): Promise<MusicLibrary> {
   const client = new SongsClient();
@@ -16,17 +17,33 @@ async function getAllSongsInfo(): Promise<MusicLibrary> {
 export default function SongsScreen() {
   const [songInfos, setSongInfos] = useState<MusicLibrary>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
   const { currentIndex, setCurrentIndex } = useSongs();
   const { setUrl } = usePlayer();
+  const { setAllThemes } = useTheme();
 
   async function loadSongs() {
     const data = await getAllSongsInfo();
     setSongInfos(data);
     setIsLoading(false);
+    setAllThemes(data.themes);
   }
 
   useEffect(() => {
     loadSongs();
+  }, []);
+
+  useEffect(() => {
+    function handleUserInteraction() {
+      setHasUserInteracted(true);
+    }
+
+    window.addEventListener("click", handleUserInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("click", handleUserInteraction);
+    };
   }, []);
 
   const allSongs = useMemo(() => {
@@ -50,10 +67,10 @@ export default function SongsScreen() {
   );
 
   useEffect(() => {
-    if (visibleSongs[1]?.tracks?.[0]?.publicUrl) {
+    if (visibleSongs[1]?.tracks?.[0]?.publicUrl && hasUserInteracted) {
       setUrl(visibleSongs[1].tracks[0].publicUrl);
     }
-  }, [visibleSongs, setUrl]);
+  }, [visibleSongs, setUrl, hasUserInteracted]);
 
   function handleClick(direction: string) {
     if (direction === "left") {

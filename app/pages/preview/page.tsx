@@ -74,7 +74,7 @@ Baby, no chance
           onClick={handleClick}
           className=" w-full flex self-end-safe justify-end-safe"
         >
-          <SingButton />
+          <SingButton title="Cantar"/>
         </section>
       </aside>
     </main>
