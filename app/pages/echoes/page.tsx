@@ -34,18 +34,18 @@ function Echoes() {
   }, [getRandomTheme]);
 
   useEffect(() => {
-    if (videoLoaded && gifLoaded && isLoaded && selectedSong?.instrumentalUrl) {
-      setUrl(selectedSong.instrumentalUrl);
+    if (videoLoaded && gifLoaded && isLoaded && selectedSong?.vocalUrl) {
+      setUrl(selectedSong.vocalUrl);
     }
   }, [videoLoaded, gifLoaded, isLoaded, selectedSong, setUrl]);
 
   useEffect(() => {
-    if (selectedSong && videoLoaded && gifLoaded && selectedSong.instrumentalUrl) {
-      setUrl(selectedSong.instrumentalUrl);
+    if (selectedSong && videoLoaded && gifLoaded && selectedSong.vocalUrl) {
+      setUrl(selectedSong.vocalUrl);
     }
   }, [selectedSong, setUrl, videoLoaded, gifLoaded]);
 
-  if (selectedSong && (!selectedSong.gifUrl || !selectedSong.instrumentalUrl)) {
+  if (selectedSong && (!selectedSong.gifUrl || !selectedSong.vocalUrl)) {
     return (
       <main className="flex items-center justify-center h-screen bg-black">
         <p className="text-white">Você não selecionou</p>

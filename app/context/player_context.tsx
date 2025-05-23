@@ -31,19 +31,12 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoaded(true);
     };
 
-    // Opcional: para resetar isLoaded quando mudar URL
-    const onWaiting = () => {
-      setIsLoaded(false);
-    };
-
     audio.addEventListener("canplaythrough", onCanPlayThrough);
-    audio.addEventListener("waiting", onWaiting);
 
     return () => {
       audio.pause();
       audio.src = "";
       audio.removeEventListener("canplaythrough", onCanPlayThrough);
-      audio.removeEventListener("waiting", onWaiting);
     };
   }, []);
 
