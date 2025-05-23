@@ -1,10 +1,63 @@
 "use client";
+
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import SongsClient from "./client/lambda/songs/songs_client";
 import SingButton from "./components/sing_button";
+import { useSongs } from "./context/songs_context";
+import { useTheme } from "./context/theme_context";
+
+async function getAllSongsInfo(): Promise<MusicLibrary> {
+  const client = new SongsClient();
+  return client.getAllSongs();
+}
 
 export default function Home() {
   const router = useRouter();
+  const { setAllSongs } = useSongs();
+  const { setAllThemes } = useTheme();
+
+  async function loadSongs() {
+    const data = await getAllSongsInfo();
+    let songs: Song[] = [];
+
+    data.artists.forEach((artist: Artist) => {
+      artist.albums.forEach((album: Album) => {
+        const groupedTracks = album.tracks.reduce((acc, track: Track) => {
+          const trackKey = track.name.replace(/\((.*?)\)\.\w+$/, "").trim();
+
+          if (!acc[trackKey]) {
+            acc[trackKey] = {};
+          }
+
+          acc[trackKey][track.type] = track.publicUrl;
+          return acc;
+        }, {} as Record<string, Record<string, string>>);
+
+        Object.entries(groupedTracks).forEach(([trackName, trackTypes]) => {
+          songs.push({
+            albumName: album.name,
+            artistName: artist.name,
+            coverUrl: album.cover.publicUrl,
+            gifUrl: album.gif?.publicUrl || "",
+            demoUrl: trackTypes["corte"] || trackTypes["demo"] || "",
+            instrumentalUrl: trackTypes["instrumental"] || "",
+            vocalUrl: trackTypes["vocal"] || "",
+          });
+        });
+      });
+    });
+
+    setAllSongs(songs);
+    setAllThemes(data.themes);
+    sessionStorage.setItem("songs", JSON.stringify(songs));
+    sessionStorage.setItem("themes", JSON.stringify(data.themes));
+  }
+
+  useEffect(() => {
+    loadSongs();
+  }, []);
 
   return (
     <main className="h-screen flex flex-row items-center justify-center relative overflow-hidden p-14">

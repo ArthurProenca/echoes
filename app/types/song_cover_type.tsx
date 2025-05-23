@@ -5,6 +5,4 @@ export type SongCoverType = Readonly<{
   name: string;
   artist: string;
   onClick?: () => void;
-  tracks: Track[];
-  gif: string;
 }>;

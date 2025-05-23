@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, Jersey_10 } from "next/font/google";
-import "./globals.css";
-import { PlayerProvider } from "./context/player_context";
 import GlobalPlayer from "./components/global_song_player";
+import { PlayerProvider } from "./context/player_context";
 import { SongsProvider } from "./context/songs_context";
-import { SelectedSongsProvider } from "./context/selected_song_context";
 import { ThemesProvider } from "./context/theme_context";
+import "./globals.css";
 
 const Jersey10 = Jersey_10({
   variable: "--font-jersey-10",
@@ -37,9 +36,7 @@ export default function RootLayout({
       >
         <PlayerProvider>
           <SongsProvider>
-            <SelectedSongsProvider>
-              <ThemesProvider>{children}</ThemesProvider>
-            </SelectedSongsProvider>
+            <ThemesProvider>{children}</ThemesProvider>
           </SongsProvider>
           <GlobalPlayer />
         </PlayerProvider>

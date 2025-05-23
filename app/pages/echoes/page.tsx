@@ -2,33 +2,54 @@
 
 import BackscreenButton from "@/app/components/backscreen_button";
 import { usePlayer } from "@/app/context/player_context";
-import { useSelectedSong } from "@/app/context/selected_song_context";
+import { useSongs } from "@/app/context/songs_context";
 import { useTheme } from "@/app/context/theme_context";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
 function Echoes() {
-  const { setUrl } = usePlayer();
-  const { currentSongGifUrl, currentSongUrl } = useSelectedSong();
+  const { setUrl, isLoaded } = usePlayer();
+  const { selectedSong } = useSongs();
   const { getRandomTheme } = useTheme();
   const [theme, setTheme] = useState<Theme>();
 
-  // Estados para controle de loading
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [gifLoaded, setGifLoaded] = useState(false);
 
+  if (!selectedSong) {
+    return null;
+  }
+
   useEffect(() => {
-    setUrl(currentSongUrl);
-  }, [currentSongUrl, setUrl]);
+    console.log("videoLoaded", videoLoaded);
+  }, [videoLoaded]);
+
+  useEffect(() => {
+    console.log("isLoaded (audio)", isLoaded);
+  }, [isLoaded]);
+
+  useEffect(() => {
+    console.log("gifLoaded", gifLoaded);
+  }, [gifLoaded]);
 
   useEffect(() => {
     const selectedTheme = getRandomTheme();
     setTheme(selectedTheme);
   }, [getRandomTheme]);
 
-  if (!currentSongGifUrl || !currentSongUrl) {
-    setUrl("stop");
+  useEffect(() => {
+    if (videoLoaded && gifLoaded && isLoaded && selectedSong?.instrumentalUrl) {
+      setUrl(selectedSong.instrumentalUrl);
+    }
+  }, [videoLoaded, gifLoaded, isLoaded, selectedSong, setUrl]);
 
+  useEffect(() => {
+    if (videoLoaded && gifLoaded && selectedSong.instrumentalUrl) {
+      setUrl(selectedSong.instrumentalUrl);
+    }
+  }, [selectedSong, setUrl, videoLoaded, gifLoaded]);
+
+  if (!selectedSong.gifUrl || !selectedSong.instrumentalUrl) {
     return (
       <main className="flex items-center justify-center h-screen bg-black">
         <p className="text-white">Você não selecionou</p>
@@ -36,7 +57,7 @@ function Echoes() {
     );
   }
 
-  const isLoading = !videoLoaded || !gifLoaded;
+  const isLoading = !videoLoaded || !gifLoaded || !isLoaded;
 
   return (
     <main className="relative h-screen w-screen overflow-hidden p-14 bg-black">
@@ -56,7 +77,13 @@ function Echoes() {
 
       {isLoading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-20">
-          <Image width={40} height={40} alt="" src="/main_page_icon.svg" className="animate-spin" />
+          <Image
+            width={40}
+            height={40}
+            alt=""
+            src="/main_page_icon.svg"
+            className="animate-spin"
+          />
           <p className="text-white text-lg">Carregando...</p>
         </div>
       )}
@@ -71,7 +98,7 @@ function Echoes() {
         }`}
       >
         <Image
-          src={currentSongGifUrl}
+          src={selectedSong.gifUrl}
           alt=""
           width={720}
           height={720}

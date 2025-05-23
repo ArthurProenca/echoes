@@ -2,43 +2,25 @@
 import { SongCoverType } from "@/app/types/song_cover_type";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useSelectedSong } from "../context/selected_song_context";
+import { usePlayer } from "../context/player_context";
+import { useEffect } from "react";
+import { useSongs } from "../context/songs_context";
 
 export default function SongCover(props: SongCoverType) {
   const router = useRouter();
-  const {
-    setCurrentSongCoverUrl,
-    setCurrentSongDemoUrl,
-    setCurrentSongGifUrl,
-    setCurrentSongUrl,
-    setCurrentSongArtistName,
-    setCurrentSongName
-  } = useSelectedSong();
-  const shortTrack = props.tracks.find((track) => track.type === "corte");
+  const { selectedSong } = useSongs();
+  const { setUrl } = usePlayer();
 
-  if (!shortTrack) {
-    return;
+  function goToPreviewPage() {
+    router.push(`/pages/preview`);
   }
 
-  function goToPreviewPage(tracks: Track[], publicUrl: string) {
-    const track = tracks.find((track) => track.type === "corte");
-    const instrumentalTrack = tracks.find(
-      (track) => track.type === "instrumental"
-    );
-    if (!instrumentalTrack || !track) {
+  useEffect(() => {
+    if (!selectedSong || !props.isCenter) {
       return;
     }
-
-    setCurrentSongCoverUrl(publicUrl);
-    setCurrentSongGifUrl(props.gif);
-    setCurrentSongUrl(instrumentalTrack.publicUrl);
-    setCurrentSongDemoUrl(track?.publicUrl);
-    setCurrentSongArtistName(props.artist);
-    setCurrentSongName(props.name);
-    router.push(
-      `/pages/preview`
-    );
-  }
+    setUrl(selectedSong?.demoUrl);
+  }, [selectedSong]);
 
   return (
     <div
@@ -57,11 +39,7 @@ export default function SongCover(props: SongCoverType) {
       }}
     >
       <Image
-        onClick={
-          props.isCenter
-            ? () => goToPreviewPage(props.tracks, props.publicUrl)
-            : () => {}
-        }
+        onClick={props.isCenter ? () => goToPreviewPage() : () => {}}
         alt={props.name}
         src={props.publicUrl}
         width={30}

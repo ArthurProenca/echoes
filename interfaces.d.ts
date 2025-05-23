@@ -19,7 +19,7 @@ declare global {
   }
 
   interface Gif {
-    publicUrl : string;
+    publicUrl: string;
   }
 
   interface Album {
@@ -46,6 +46,16 @@ declare global {
   interface MusicLibrary {
     artists: Artist[];
     themes: Theme[];
+  }
+
+  interface Song {
+    coverUrl: string;
+    demoUrl: string;
+    instrumentalUrl: string;
+    vocalUrl: string;
+    gifUrl: string;
+    artistName: string;
+    albumName: string;
   }
 }
 

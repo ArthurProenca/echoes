@@ -1,94 +1,43 @@
 "use client";
 
-import SongsClient from "@/app/client/lambda/songs/songs_client";
+import { useSongs } from "@/app/context/songs_context";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import SongCover from "../../components/song_cover";
 import SongTitle from "../../components/song_title";
-import { usePlayer } from "@/app/context/player_context";
-import { useSongs } from "@/app/context/songs_context";
 import { useTheme } from "@/app/context/theme_context";
 
-async function getAllSongsInfo(): Promise<MusicLibrary> {
-  const client = new SongsClient();
-  return client.getAllSongs();
-}
-
 export default function SongsScreen() {
-  const [songInfos, setSongInfos] = useState<MusicLibrary>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
-
-  const { currentIndex, setCurrentIndex } = useSongs();
-  const { setUrl } = usePlayer();
+  const {
+    allSongs,
+    setSelectedSong,
+    currentIndex,
+    setCurrentIndex,
+    setAllSongs,
+  } = useSongs();
   const { setAllThemes } = useTheme();
-
-  async function loadSongs() {
-    const data = await getAllSongsInfo();
-    setSongInfos(data);
-    setIsLoading(false);
-    setAllThemes(data.themes);
-  }
+  const [visibleSongs, setVisibleSongs] = useState<Song[]>([]);
 
   useEffect(() => {
-    loadSongs();
-  }, []);
+    if (allSongs.length >= 3) {
+      setVisibleSongs(allSongs.slice(currentIndex - 1, currentIndex + 2));
+    }
+  }, [allSongs, currentIndex]);
 
   useEffect(() => {
-    function handleUserInteraction() {
-      setHasUserInteracted(true);
+    const cachedSongs = sessionStorage.getItem("songs");
+    const cachedThemes = sessionStorage.getItem("themes");
+    if (allSongs.length == 0 && cachedSongs && cachedThemes) {
+      setAllSongs(JSON.parse(cachedSongs));
+      setAllThemes(JSON.parse(cachedThemes));
     }
-
-    window.addEventListener("click", handleUserInteraction, { once: true });
-
-    return () => {
-      window.removeEventListener("click", handleUserInteraction);
-    };
-  }, []);
-
-  const allSongs = useMemo(() => {
-    return (
-      songInfos?.artists.flatMap((artist) =>
-        artist.albums.map((song) => ({
-          ...song,
-          artistName: artist.name,
-        }))
-      ) ?? []
-    );
-  }, [songInfos]);
-
-  const visibleSongs = useMemo(
-    () => [
-      allSongs[(currentIndex - 1 + allSongs.length) % allSongs.length],
-      allSongs[currentIndex],
-      allSongs[(currentIndex + 1) % allSongs.length],
-    ],
-    [currentIndex, allSongs]
-  );
+  }, [allSongs]);
 
   useEffect(() => {
-    if (visibleSongs[1]?.tracks?.[0]?.publicUrl && hasUserInteracted) {
-      setUrl(visibleSongs[1].tracks[0].publicUrl);
+    if (visibleSongs.length === 3) {
+      setSelectedSong(visibleSongs[1]);
     }
-  }, [visibleSongs, setUrl, hasUserInteracted]);
-
-  function handleClick(direction: string) {
-    if (direction === "left") {
-      setCurrentIndex((prev) => (prev - 1 + allSongs.length) % allSongs.length);
-    } else if (direction === "right") {
-      setCurrentIndex((prev) => (prev + 1) % allSongs.length);
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Image width={40} height={40} alt="" src="/main_page_icon.svg" className="animate-spin" />
-        </div>
-      </main>
-    );
-  }
+  }, [visibleSongs, setSelectedSong]);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-start relative bg-custom-radial">
@@ -100,22 +49,29 @@ export default function SongsScreen() {
         <section className="flex flex-row justify-center items-center gap-4 mb-4">
           {visibleSongs.map((song, idx) => {
             const isCenter = idx === 1;
-
             const position = isCenter ? "center" : idx === 0 ? "left" : "right";
+
             return (
               <button
                 className={isCenter ? "song-center" : "song-side"}
-                key={song.name + currentIndex}
-                onClick={() => handleClick(position)}
+                key={song.albumName}
+                onClick={() => {
+                  if (position === "left" && currentIndex > 1) {
+                    setCurrentIndex(currentIndex - 1);
+                  } else if (
+                    position === "right" &&
+                    currentIndex < allSongs.length - 2
+                  ) {
+                    setCurrentIndex(currentIndex + 1);
+                  }
+                }}
               >
                 <SongCover
                   id={idx}
                   isCenter={isCenter}
-                  name={song.name}
+                  name={song.albumName}
                   artist={song.artistName}
-                  publicUrl={song.cover.publicUrl}
-                  tracks={song.tracks}
-                  gif={song?.gif?.publicUrl}
+                  publicUrl={song.coverUrl}
                 />
               </button>
             );
@@ -130,6 +86,7 @@ export default function SongsScreen() {
             className="w-full h-full"
             src="/wave_effect.gif"
             unoptimized
+            priority
           />
         </section>
 
@@ -138,11 +95,11 @@ export default function SongsScreen() {
             const isCenter = idx === 1;
             return (
               <SongTitle
-                key={song.name + currentIndex}
+                key={song.albumName}
                 id={idx}
                 artist={song.artistName}
                 isCenter={isCenter}
-                title={song.name}
+                title={song.albumName}
               />
             );
           })}

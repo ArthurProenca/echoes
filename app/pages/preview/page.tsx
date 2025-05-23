@@ -3,19 +3,18 @@
 import BackscreenButton from "@/app/components/backscreen_button";
 import SingButton from "@/app/components/sing_button";
 import { usePlayer } from "@/app/context/player_context";
-import { useSelectedSong } from "@/app/context/selected_song_context";
+import { useSongs } from "@/app/context/songs_context";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 
 function PreviewSongPage() {
-  const { currentSongCoverUrl, currentSongArtistName, currentSongName } =
-    useSelectedSong();
+  const { selectedSong } = useSongs();
   const { setUrl } = usePlayer();
   const router = useRouter();
 
-  if (!currentSongCoverUrl || !currentSongArtistName || !currentSongName) {
-    return <div>Eita</div>;
+  if (!selectedSong) {
+    return;
   }
 
   const rawLyrics = `
@@ -39,14 +38,14 @@ Baby, no chance
   };
 
   return (
-    <main className="max-h-screen flex flex-row items-center justify-between relative overflow-hidden p-14 bg-custom-radial" >
+    <main className="max-h-screen flex flex-row items-center justify-between relative overflow-hidden p-14 bg-custom-radial">
       <aside
         className="w-[52%] pb-10 -ml-60 animate-spin "
         style={{ animationDuration: "7s" }}
       >
         <Image
-          alt={""}
-          src={currentSongCoverUrl}
+          alt={selectedSong.albumName}
+          src={selectedSong.coverUrl}
           width={20}
           height={20}
           className="w-full h-full object-cover rounded-full"
@@ -59,10 +58,10 @@ Baby, no chance
         </section>
         <section className="w-full flex flex-col self-end-safe justify-end-safe text-end">
           <span className="w-full self-center text-8xl uppercase font-jersey text-end">
-            {currentSongName}
+            {selectedSong?.albumName}
           </span>
           <span className="w-full self-center text-5xl uppercase font-jersey text-end">
-            {currentSongArtistName}
+            {selectedSong?.artistName}
           </span>
         </section>
         <section className="w-full">
@@ -74,7 +73,7 @@ Baby, no chance
           onClick={handleClick}
           className=" w-full flex self-end-safe justify-end-safe"
         >
-          <SingButton title="Cantar"/>
+          <SingButton title="Cantar" />
         </section>
       </aside>
     </main>
