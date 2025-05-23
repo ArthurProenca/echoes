@@ -20,7 +20,11 @@ export default function SongsScreen() {
 
   useEffect(() => {
     if (allSongs.length >= 3) {
-      setVisibleSongs(allSongs.slice(currentIndex - 1, currentIndex + 2));
+      const total = allSongs.length;
+      const left = (currentIndex - 1 + total) % total;
+      const center = currentIndex % total;
+      const right = (currentIndex + 1) % total;
+      setVisibleSongs([allSongs[left], allSongs[center], allSongs[right]]);
     }
   }, [allSongs, currentIndex]);
 
@@ -54,15 +58,14 @@ export default function SongsScreen() {
             return (
               <button
                 className={isCenter ? "song-center" : "song-side"}
-                key={song.albumName}
+                key={song.albumName + idx}
                 onClick={() => {
-                  if (position === "left" && currentIndex > 1) {
-                    setCurrentIndex(currentIndex - 1);
-                  } else if (
-                    position === "right" &&
-                    currentIndex < allSongs.length - 2
-                  ) {
-                    setCurrentIndex(currentIndex + 1);
+                  if (position === "left") {
+                    setCurrentIndex(
+                      (currentIndex - 1 + allSongs.length) % allSongs.length
+                    );
+                  } else if (position === "right") {
+                    setCurrentIndex((currentIndex + 1) % allSongs.length);
                   }
                 }}
               >
@@ -95,7 +98,7 @@ export default function SongsScreen() {
             const isCenter = idx === 1;
             return (
               <SongTitle
-                key={song.albumName}
+                key={song.albumName + idx}
                 id={idx}
                 artist={song.artistName}
                 isCenter={isCenter}
