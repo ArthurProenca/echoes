@@ -20,7 +20,7 @@ export default function Home() {
 
   async function loadSongs() {
     const data = await getAllSongsInfo();
-    let songs: Song[] = [];
+    const songs: Song[] = [];
 
     data.artists.forEach((artist: Artist) => {
       artist.albums.forEach((album: Album) => {
@@ -35,7 +35,7 @@ export default function Home() {
           return acc;
         }, {} as Record<string, Record<string, string>>);
 
-        Object.entries(groupedTracks).forEach(([trackName, trackTypes]) => {
+        Object.entries(groupedTracks).forEach(([, trackTypes]) => {
           songs.push({
             albumName: album.name,
             artistName: artist.name,

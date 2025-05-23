@@ -16,10 +16,6 @@ function Echoes() {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [gifLoaded, setGifLoaded] = useState(false);
 
-  if (!selectedSong) {
-    return null;
-  }
-
   useEffect(() => {
     console.log("videoLoaded", videoLoaded);
   }, [videoLoaded]);
@@ -44,17 +40,21 @@ function Echoes() {
   }, [videoLoaded, gifLoaded, isLoaded, selectedSong, setUrl]);
 
   useEffect(() => {
-    if (videoLoaded && gifLoaded && selectedSong.instrumentalUrl) {
+    if (selectedSong && videoLoaded && gifLoaded && selectedSong.instrumentalUrl) {
       setUrl(selectedSong.instrumentalUrl);
     }
   }, [selectedSong, setUrl, videoLoaded, gifLoaded]);
 
-  if (!selectedSong.gifUrl || !selectedSong.instrumentalUrl) {
+  if (selectedSong && (!selectedSong.gifUrl || !selectedSong.instrumentalUrl)) {
     return (
       <main className="flex items-center justify-center h-screen bg-black">
         <p className="text-white">Você não selecionou</p>
       </main>
     );
+  }
+
+  if (!selectedSong) {
+    return null;
   }
 
   const isLoading = !videoLoaded || !gifLoaded || !isLoaded;
