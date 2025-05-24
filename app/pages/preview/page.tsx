@@ -46,7 +46,7 @@ function PreviewSongPage() {
     stop();
     setIsLoading(true);
     preloadUrl(
-      isDevMode ? selectedSong.vocalUrl : selectedSong.demoUrl
+      isDevMode ? selectedSong.vocalUrl : selectedSong.instrumentalUrl
     ).then((res) => {
       if (res) {
         router.push(`/pages/echoes`);
