@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, Jersey_10 } from "next/font/google";
-import GlobalPlayer from "./components/global_song_player";
 import { PlayerProvider } from "./context/player_context";
 import { SongsProvider } from "./context/songs_context";
 import { ThemesProvider } from "./context/theme_context";
@@ -44,7 +43,6 @@ export default function RootLayout({
               </DevModeProvider>
             </ThemesProvider>
           </SongsProvider>
-          <GlobalPlayer />
         </PlayerProvider>
       </body>
     </html>
