@@ -17,7 +17,7 @@ export default function BackscreenButton(props: props) {
     stopRecording().then(() => {
       stop();
       if (props.isHome) {
-        router.push("/");
+        router.push("/pages/songs");
       } else {
         router.back();
       }

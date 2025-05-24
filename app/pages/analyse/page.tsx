@@ -6,17 +6,14 @@ import { useSongs } from "@/app/context/songs_context";
 import { useEffect, useState } from "react";
 
 function getFromRange(number: number) {
-  if (number <= 20) {
-    return 20;
-  }
-  if (number <= 50) {
+  if (number <= 55) {
     return 50;
-  }
-  if (number <= 80) {
+  } else if (number <= 60) {
+    return 60;
+  } else if (number <= 70) {
+    return 70;
+  } else if (number <= 80) {
     return 80;
-  }
-  if (number <= 100) {
-    return 100;
   }
   return 0;
 }
@@ -31,10 +28,10 @@ function EchoesAnalyse() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const profileKeyMap = new Map<number, string>([
-    [20, "A intenção foi boa, mas... <br/> a voz não acompanhou!"],
-    [50, "Se fosse no chuveiro, tava 100%!"],
-    [80, "Muito bom! Já pode abrir um show... <br/> no karaokê do bairro!"],
-    [100, "Vem Grammy! <br/> Você nasceu pra isso!"],
+    [50, "A intenção foi boa, mas... <br/> a voz não acompanhou!"],
+    [60, "Se fosse no chuveiro, tava 100%!"],
+    [70, "Muito bom! Já pode abrir um show... <br/> no karaokê do bairro!"],
+    [80, "Vem Grammy! <br/> Você nasceu pra isso!"],
   ]);
 
   // Rotação dos textos enquanto carrega
@@ -61,7 +58,9 @@ function EchoesAnalyse() {
 
   useEffect(() => {
     setTitle(
-      isLoading ? rotatingTexts[currentIndex] : `${analyseResult.media}` + "%"
+      isLoading
+        ? rotatingTexts[currentIndex]
+        : `${Number(analyseResult.media) * 100}` + "%"
     );
     setSubtitle(isLoading ? "Calculando..." : "Análise completa!");
   }, [isLoading]);
@@ -102,8 +101,9 @@ function EchoesAnalyse() {
             style={{ fontStyle: "italic" }}
             dangerouslySetInnerHTML={{
               __html:
-                profileKeyMap.get(getFromRange(Number(analyseResult.media))) +
-                "",
+                profileKeyMap.get(
+                  getFromRange(Number(analyseResult.media) * 100)
+                ) + "",
             }}
           />
         )}
