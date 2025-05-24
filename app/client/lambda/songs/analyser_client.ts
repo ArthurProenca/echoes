@@ -35,6 +35,7 @@ export default class AnalyserClient {
         timbre_contrast_similarity: "",
         timbre_mfcc_similarity: "",
         timing_onset_similarity: "",
+        media: ""
       };
     }
   }
