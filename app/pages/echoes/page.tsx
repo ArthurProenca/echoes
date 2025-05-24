@@ -154,7 +154,6 @@ function Echoes() {
               src="/main_page_icon.svg"
               className="animate-spin"
             />
-            <p className="text-white text-lg">Carregando...</p>
           </div>
         )}
 
