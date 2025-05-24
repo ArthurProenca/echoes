@@ -57,6 +57,15 @@ declare global {
     artistName: string;
     albumName: string;
   }
+
+  interface EchoeAnalyse {
+    pitch_similarity: string;
+    timbre_mfcc_similarity: string;
+    dynamics_rms_similarity: string;
+    timing_onset_similarity: string;
+    timbre_centroid_similarity: string;
+    timbre_contrast_similarity: string;
+  }
 }
 
 export default global;

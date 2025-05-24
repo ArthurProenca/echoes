@@ -25,10 +25,10 @@ export default function SongCover(props: SongCoverType) {
   return (
     <div
       key={props.id}
-      className={`rounded-full max-w-[500px] max-h-[500px] transition-all duration-300 cursor-pointer focus:outline-none ${
-        props.isCenter
-          ? "z-20 -mr-12 -ml-12"
-          : "opacity-40 blur-[2px] z-10 w-[270px] h-[270px]"
+      className={`rounded-full max-w-[500px] max-h-[500px] transition-all duration-700 ease-in-out transform cursor-pointer focus:outline-none
+        ${props.isCenter
+          ? "z-20 -mr-12 -ml-12 scale-100 rotate-0 opacity-100"
+          : "z-10 w-[270px] h-[270px] scale-90 opacity-50 hover:scale-100 hover:rotate-3 hover:opacity-90"
       }`}
       style={{
         padding: 0,
@@ -44,8 +44,9 @@ export default function SongCover(props: SongCoverType) {
         src={props.publicUrl}
         width={30}
         height={30}
-        className="w-full h-full object-cover rounded-full"
+        className="w-full h-full object-cover rounded-full transition-transform duration-700 ease-in-out"
         unoptimized
+        draggable={false}
       />
     </div>
   );

@@ -36,6 +36,10 @@ export default function Home() {
         }, {} as Record<string, Record<string, string>>);
 
         Object.entries(groupedTracks).forEach(([, trackTypes]) => {
+          fetch(album.cover.publicUrl);
+          fetch(album.gif.publicUrl);
+          fetch(trackTypes["corte"]);
+          fetch(trackTypes["instrumental"]);
           songs.push({
             albumName: album.name,
             artistName: artist.name,

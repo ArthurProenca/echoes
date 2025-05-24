@@ -12,6 +12,7 @@ type PlayerContextType = {
   isLoaded: boolean;
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
   url: string;
+  onEnded: (callback: () => void) => void;  // função para registrar callback de fim de música
 };
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -21,22 +22,32 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const [url, setUrlState] = useState<string>("");
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Armazena callbacks para "ended"
+  const endedCallbacks = useRef<(() => void)[]>([]);
+
   useEffect(() => {
     audioRef.current = new Audio();
 
     const audio = audioRef.current;
 
-    // Quando o áudio estiver carregado o suficiente para tocar sem interrupção
     const onCanPlayThrough = () => {
       setIsLoaded(true);
     };
 
+    const onEnded = () => {
+      // Quando áudio terminar, chama todos os callbacks registrados
+      endedCallbacks.current.forEach((cb) => cb());
+    };
+
     audio.addEventListener("canplaythrough", onCanPlayThrough);
+    audio.addEventListener("ended", onEnded);
 
     return () => {
       audio.pause();
       audio.src = "";
       audio.removeEventListener("canplaythrough", onCanPlayThrough);
+      audio.removeEventListener("ended", onEnded);
+      endedCallbacks.current = [];
     };
   }, []);
 
@@ -67,8 +78,17 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  // Função para registrar callback do evento ended
+  const onEnded = (callback: () => void) => {
+    endedCallbacks.current.push(callback);
+    // Opcional: retornar função para remover o callback depois
+    return () => {
+      endedCallbacks.current = endedCallbacks.current.filter((cb) => cb !== callback);
+    };
+  };
+
   return (
-    <PlayerContext.Provider value={{ setUrl, isLoaded, audioRef, url }}>
+    <PlayerContext.Provider value={{ setUrl, isLoaded, audioRef, url, onEnded }}>
       {children}
     </PlayerContext.Provider>
   );
