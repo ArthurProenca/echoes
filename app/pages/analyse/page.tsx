@@ -1,14 +1,31 @@
 "use client";
 import BackscreenButton from "@/app/components/backscreen_button";
+import { useAnalyse } from "@/app/context/analyse_context";
 import { usePlayer } from "@/app/context/player_context";
-import { useRecorder } from "@/app/context/recorder_context";
 import { useSongs } from "@/app/context/songs_context";
 import { useEffect, useState } from "react";
 
+function getFromRange(number: number) {
+  if (number <= 20) {
+    return 20;
+  }
+  if (number <= 50) {
+    return 50;
+  }
+  if (number <= 80) {
+    return 80;
+  }
+  if (number <= 100) {
+    return 100;
+  }
+  return 0;
+}
+
 function EchoesAnalyse() {
   const { selectedSong } = useSongs();
-  //const { analyseResult, sendToAnalyse } = useAnalyse();
-  const { stopRecording } = useRecorder();
+  const { analyseResult, sendToAnalyse, setAnalyseResult } = useAnalyse();
+  const [title, setTitle] = useState<string>("");
+  const [subtitle, setSubtitle] = useState<string>("");
 
   const { stop } = usePlayer();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -26,10 +43,11 @@ function EchoesAnalyse() {
 
   useEffect(() => {
     stop();
-    stopRecording().then(() => {
+    sendToAnalyse().then((res) => {
+      if (res) setAnalyseResult(res);
       setIsLoading(false);
     });
-  });
+  }, []);
 
   useEffect(() => {
     if (!isLoading) return;
@@ -41,13 +59,17 @@ function EchoesAnalyse() {
     return () => clearInterval(interval);
   }, [isLoading, rotatingTexts.length]);
 
-  const displayTitle = isLoading ? rotatingTexts[currentIndex] : "TOM DE VOZ?";
-  const displaySubtitle = isLoading ? "Calculando..." : "Análise completa!";
+  useEffect(() => {
+    setTitle(
+      isLoading ? rotatingTexts[currentIndex] : `${analyseResult.media}` + "%"
+    );
+    setSubtitle(isLoading ? "Calculando..." : "Análise completa!");
+  }, [isLoading]);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-between relative bg-custom-radial p-14">
       <section className="flex w-full justify-end z-30">
-        <BackscreenButton />
+        <BackscreenButton isHome={true} />
       </section>
       <section>
         <h1
@@ -63,10 +85,10 @@ function EchoesAnalyse() {
           <div className="relative w-80 h-80 rounded-full pulse-shadow-inner">
             <div className="gap-4 w-80 h-80 rounded-full bg-[rgba(205,118,242,1)] flex items-center justify-center text-white text-center flex-col">
               <span id="title" className="text-4xl font-bold">
-                {displayTitle}
+                {title}
               </span>
               <span id="subtitle" className="text-2xl">
-                {displaySubtitle}
+                {subtitle}
               </span>
             </div>
           </div>
@@ -74,11 +96,17 @@ function EchoesAnalyse() {
       </div>
 
       <div>
-        <p
-          className="font-instrument-sans text-3xl"
-          style={{ fontStyle: "italic" }}
-          dangerouslySetInnerHTML={{ __html: profileKeyMap.get(50) + "" }}
-        />
+        {!isLoading && (
+          <p
+            className="font-instrument-sans text-3xl"
+            style={{ fontStyle: "italic" }}
+            dangerouslySetInnerHTML={{
+              __html:
+                profileKeyMap.get(getFromRange(Number(analyseResult.media))) +
+                "",
+            }}
+          />
+        )}
       </div>
       <div />
     </main>

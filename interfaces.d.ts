@@ -71,6 +71,7 @@ declare global {
     timing_onset_similarity: string;
     timbre_centroid_similarity: string;
     timbre_contrast_similarity: string;
+    media: string;
   }
 }
 

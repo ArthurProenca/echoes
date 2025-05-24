@@ -72,7 +72,7 @@ function Echoes() {
         {!allLoaded && <Loading />}
 
         <section className="flex w-full justify-end z-30">
-          <BackscreenButton />
+          <BackscreenButton isHome={true} />
         </section>
 
         <div

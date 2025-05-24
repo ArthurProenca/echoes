@@ -61,13 +61,13 @@ export default function Home() {
 
   useEffect(() => {
     loadSongs();
-  });
+  }, []);
 
   if (isLoading) {
     return <Loading />;
   }
   return (
-    <main className="h-screen flex flex-row items-center justify-center relative overflow-hidden p-14">
+    <main className="h-screen flex flex-row items-center justify-center relative overflow-hidden p-14 bg-custom-radial">
       <section className="w-full h-full">
         <div className="flex flex-row items-center justify-between w-full h-full">
           <span>Karaokê</span>
@@ -86,7 +86,7 @@ export default function Home() {
               </span>
             </div>
           </div>
-          <span>100% carregado</span>
+          <span>Aniversauro da Dodora {"<3"} sz sz</span>
         </div>
       </section>
     </main>

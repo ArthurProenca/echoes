@@ -46,7 +46,7 @@ function PreviewSongPage() {
     stop();
     setIsLoading(true);
     preloadUrl(
-      isDevMode ? selectedSong.vocalUrl : selectedSong.instrumentalUrl
+      isDevMode ? selectedSong.vocalUrl : selectedSong.demoUrl
     ).then((res) => {
       if (res) {
         router.push(`/pages/echoes`);
@@ -75,7 +75,7 @@ function PreviewSongPage() {
       </aside>
       <aside className="w-[50%] max-h-screen flex flex-col gap-6">
         <section className="flex self-end-safe justify-end-safe">
-          <BackscreenButton />
+          <BackscreenButton isHome={false}/>
         </section>
         <section className="w-full flex flex-col self-end-safe justify-end-safe text-end">
           <span className="w-full self-center text-8xl uppercase font-jersey text-end">

@@ -4,7 +4,11 @@ import { useRouter } from "next/navigation";
 import { usePlayer } from "../context/player_context";
 import { useRecorder } from "../context/recorder_context";
 
-export default function BackscreenButton() {
+interface props {
+  readonly isHome: boolean;
+}
+
+export default function BackscreenButton(props: props) {
   const router = useRouter();
   const { stop } = usePlayer();
   const { stopRecording } = useRecorder();
@@ -12,7 +16,11 @@ export default function BackscreenButton() {
   const handleClick = () => {
     stopRecording().then(() => {
       stop();
-      router.back();
+      if (props.isHome) {
+        router.push("/");
+      } else {
+        router.back();
+      }
     });
   };
 

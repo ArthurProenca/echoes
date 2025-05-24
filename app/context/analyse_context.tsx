@@ -28,6 +28,7 @@ export const AnalyseProvider = ({
     timbre_contrast_similarity: "N/A",
     timbre_mfcc_similarity: "N/A",
     timing_onset_similarity: "N/A",
+    media: "N/A",
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
