@@ -5,6 +5,8 @@ import { PlayerProvider } from "./context/player_context";
 import { SongsProvider } from "./context/songs_context";
 import { ThemesProvider } from "./context/theme_context";
 import "./globals.css";
+import { DevModeProvider } from "./context/dev_mode_context";
+import { RecorderProvider } from "./context/recorder_context";
 
 const Jersey10 = Jersey_10({
   variable: "--font-jersey-10",
@@ -36,7 +38,11 @@ export default function RootLayout({
       >
         <PlayerProvider>
           <SongsProvider>
-            <ThemesProvider>{children}</ThemesProvider>
+            <ThemesProvider>
+              <DevModeProvider>
+                <RecorderProvider>{children}</RecorderProvider>
+              </DevModeProvider>
+            </ThemesProvider>
           </SongsProvider>
           <GlobalPlayer />
         </PlayerProvider>

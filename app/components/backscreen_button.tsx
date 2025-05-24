@@ -2,14 +2,18 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { usePlayer } from "../context/player_context";
+import { useRecorder } from "../context/recorder_context";
 
 export default function BackscreenButton() {
   const router = useRouter();
   const { stop } = usePlayer();
+  const { stopRecording } = useRecorder();
 
   const handleClick = () => {
-    stop();
-    router.back();
+    stopRecording().then(() => {
+      stop();
+      router.back();
+    });
   };
 
   return (

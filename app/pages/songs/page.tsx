@@ -7,6 +7,7 @@ import SongCover from "../../components/song_cover";
 import SongTitle from "../../components/song_title";
 import { useTheme } from "@/app/context/theme_context";
 import Loading from "@/app/components/loading";
+import { useDevMode } from "@/app/context/dev_mode_context";
 
 export default function SongsScreen() {
   const {
@@ -19,6 +20,7 @@ export default function SongsScreen() {
   const { setAllThemes } = useTheme();
   const [visibleSongs, setVisibleSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { setIsDevMode, isDevMode } = useDevMode();
 
   useEffect(() => {
     if (allSongs.length >= 3) {
@@ -53,7 +55,14 @@ export default function SongsScreen() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-start relative bg-custom-radial">
       <section>
-        <h1 className="pt-12 pb-8 text-6xl font-jersey">ECHOES</h1>
+        <h1
+          className="pt-12 pb-8 text-6xl font-jersey select-none cursor-pointer"
+          style={{ color: isDevMode ? "#9D5FFE" : "" }}
+          onDoubleClick={() => setIsDevMode((prev) => !prev)}
+          title="Double-click to toggle dev mode"
+        >
+          ECHOES
+        </h1>
       </section>
 
       <article className="w-full flex-grow items-center">

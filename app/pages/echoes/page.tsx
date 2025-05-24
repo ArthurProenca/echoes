@@ -1,19 +1,13 @@
 "use client";
 
-import AnalyserClient from "@/app/client/lambda/songs/analyser_client";
 import BackscreenButton from "@/app/components/backscreen_button";
 import Loading from "@/app/components/loading";
 import { usePlayer } from "@/app/context/player_context";
+import { useRecorder } from "@/app/context/recorder_context";
 import { useSongs } from "@/app/context/songs_context";
 import { useTheme } from "@/app/context/theme_context";
-import { useRecorder } from "@/app/hooks/useRecorder";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-async function sendAudioToAnalyse(audio: Blob, vocalUrl: string) {
-  const analyserClient = new AnalyserClient();
-  return await analyserClient.soundAnalyse(audio, vocalUrl);
-}
 
 function Echoes() {
   const { playPreloadedUrl, onEnded } = usePlayer();
@@ -24,28 +18,7 @@ function Echoes() {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [gifLoaded, setGifLoaded] = useState(false);
   const [allLoaded, setAllLoaded] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<EchoeAnalyse>();
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const { start, stop } = useRecorder({
-    onStop: async (audioBlob) => {
-      const audioUrl = URL.createObjectURL(audioBlob);
-      console.log("Áudio gravado (URL):", audioUrl);
-
-      if (selectedSong?.vocalUrl) {
-        try {
-          const res = await sendAudioToAnalyse(
-            audioBlob,
-            selectedSong.vocalUrl
-          );
-          setAnalysisResult(res);
-          setModalVisible(true);
-        } catch (err) {
-          console.error("Erro ao enviar para análise:", err);
-        }
-      }
-    },
-  });
+  const { startRecording, stopRecording } = useRecorder();
 
   useEffect(() => {
     setTheme(getRandomTheme());
@@ -55,15 +28,15 @@ function Echoes() {
     if (gifLoaded && videoLoaded) {
       setAllLoaded(true);
       playPreloadedUrl();
-      start(); // inicia gravação quando tudo carregar
+      startRecording(); // inicia gravação quando tudo carregar
     }
-  }, [gifLoaded, videoLoaded, playPreloadedUrl, start]);
+  }, [gifLoaded, videoLoaded, playPreloadedUrl, startRecording]);
 
   useEffect(() => {
     onEnded(() => {
-      stop(); // para gravação quando a música termina
+      stopRecording(); // para gravação quando a música termina
     });
-  }, [onEnded, stop]);
+  }, [onEnded, stopRecording]);
 
   if (selectedSong && (!selectedSong.gifUrl || !selectedSong.vocalUrl)) {
     return (
@@ -94,7 +67,7 @@ function Echoes() {
 
         {!allLoaded && <Loading />}
 
-        <section className="flex w-full justify-end z-30" onClick={stop}>
+        <section className="flex w-full justify-end z-30">
           <BackscreenButton />
         </section>
 
@@ -113,30 +86,6 @@ function Echoes() {
           />
         </div>
       </main>
-
-      {modalVisible && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300"
-          onClick={() => setModalVisible(false)}
-        >
-          <div
-            className="bg-gray-900 text-white max-w-lg max-h-[80vh] overflow-auto p-6 rounded-lg shadow-lg relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="absolute top-3 right-3 text-white text-xl font-bold hover:text-red-500"
-              onClick={() => setModalVisible(false)}
-              aria-label="Fechar modal"
-            >
-              &times;
-            </button>
-            <h2 className="text-2xl mb-4">Resultado da Análise</h2>
-            <pre className="whitespace-pre-wrap break-words text-sm font-mono bg-gray-800 p-4 rounded">
-              {JSON.stringify(analysisResult, null, 2)}
-            </pre>
-          </div>
-        </div>
-      )}
     </>
   );
 }

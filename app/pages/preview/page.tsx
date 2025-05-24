@@ -3,6 +3,7 @@
 import BackscreenButton from "@/app/components/backscreen_button";
 import Loading from "@/app/components/loading";
 import SingButton from "@/app/components/sing_button";
+import { useDevMode } from "@/app/context/dev_mode_context";
 import { usePlayer } from "@/app/context/player_context";
 import { useSongs } from "@/app/context/songs_context";
 import Image from "next/image";
@@ -15,6 +16,7 @@ function PreviewSongPage() {
   const router = useRouter();
   const [lyric, setLyrics] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { isDevMode } = useDevMode();
 
   useEffect(() => {
     if (!selectedSong?.lyricsUrl) return;
@@ -42,7 +44,9 @@ function PreviewSongPage() {
   }
   const handleClick = () => {
     stop();
-    preloadUrl(selectedSong.vocalUrl).then((res) => {
+    preloadUrl(
+      isDevMode ? selectedSong.vocalUrl : selectedSong.instrumentalUrl
+    ).then((res) => {
       if (res) {
         router.push(`/pages/echoes`);
       }
