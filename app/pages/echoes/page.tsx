@@ -7,13 +7,14 @@ import { useRecorder } from "@/app/context/recorder_context";
 import { useSongs } from "@/app/context/songs_context";
 import { useTheme } from "@/app/context/theme_context";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 function Echoes() {
-  const { playPreloadedUrl, onEnded } = usePlayer();
+  const { playPreloadedUrl, onEnded, stop } = usePlayer();
   const { selectedSong } = useSongs();
   const { getRandomTheme } = useTheme();
-
+  const router = useRouter();
   const [theme, setTheme] = useState<Theme>();
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [gifLoaded, setGifLoaded] = useState(false);
@@ -34,9 +35,12 @@ function Echoes() {
 
   useEffect(() => {
     onEnded(() => {
-      stopRecording(); // para gravação quando a música termina
+      stop();
+      stopRecording().then(() => {
+        router.push("/pages/analyse");
+      }); // para gravação quando a música termina
     });
-  }, [onEnded, stopRecording]);
+  }, [onEnded, stopRecording, stop, router]);
 
   if (selectedSong && (!selectedSong.gifUrl || !selectedSong.vocalUrl)) {
     return (

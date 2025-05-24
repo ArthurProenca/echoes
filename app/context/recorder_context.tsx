@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useRef, useState } from "react";
-import { useSongs } from "./songs_context";
+import { useAnalyse } from "./analyse_context";
 
 type RecorderContextType = {
   startRecording: () => Promise<void>;
@@ -19,8 +19,8 @@ export const RecorderProvider = ({
 }) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const { selectedSong } = useSongs();
   const [isRecording, setIsRecording] = useState(false);
+  const { setBlob } = useAnalyse();
 
   const startRecording = async () => {
     if (isRecording) return;
@@ -35,9 +35,7 @@ export const RecorderProvider = ({
 
     mediaRecorder.onstop = () => {
       const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-      if (selectedSong)
-        // Aqui você pode enviar o audioBlob para análise ou atualizar estado global
-        console.log(audioBlob + selectedSong?.vocalUrl);
+      setBlob(audioBlob);
       audioChunksRef.current = [];
       stream.getTracks().forEach((track) => track.stop());
       setIsRecording(false);
@@ -57,7 +55,7 @@ export const RecorderProvider = ({
           const audioBlob = new Blob(audioChunksRef.current, {
             type: "audio/wav",
           });
-          console.log(audioBlob);
+          setBlob(audioBlob);
           audioChunksRef.current = [];
           mediaRecorderRef.current?.stream.getTracks().forEach((t) => t.stop());
           setIsRecording(false);

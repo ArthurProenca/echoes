@@ -6,6 +6,7 @@ import { ThemesProvider } from "./context/theme_context";
 import "./globals.css";
 import { DevModeProvider } from "./context/dev_mode_context";
 import { RecorderProvider } from "./context/recorder_context";
+import { AnalyseProvider } from "./context/analyse_context";
 
 const Jersey10 = Jersey_10({
   variable: "--font-jersey-10",
@@ -39,7 +40,9 @@ export default function RootLayout({
           <SongsProvider>
             <ThemesProvider>
               <DevModeProvider>
-                <RecorderProvider>{children}</RecorderProvider>
+                <AnalyseProvider>
+                  <RecorderProvider>{children}</RecorderProvider>
+                </AnalyseProvider>
               </DevModeProvider>
             </ThemesProvider>
           </SongsProvider>

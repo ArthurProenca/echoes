@@ -44,6 +44,7 @@ function PreviewSongPage() {
   }
   const handleClick = () => {
     stop();
+    setIsLoading(true);
     preloadUrl(
       isDevMode ? selectedSong.vocalUrl : selectedSong.instrumentalUrl
     ).then((res) => {
