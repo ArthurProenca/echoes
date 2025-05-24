@@ -5,10 +5,10 @@ import { usePlayer } from "../context/player_context";
 
 export default function BackscreenButton() {
   const router = useRouter();
-  const { setUrl } = usePlayer();
+  const { stop } = usePlayer();
 
   const handleClick = () => {
-    setUrl("stop");
+    stop();
     router.back();
   };
 

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import SongCover from "../../components/song_cover";
 import SongTitle from "../../components/song_title";
 import { useTheme } from "@/app/context/theme_context";
+import Loading from "@/app/components/loading";
 
 export default function SongsScreen() {
   const {
@@ -17,6 +18,7 @@ export default function SongsScreen() {
   } = useSongs();
   const { setAllThemes } = useTheme();
   const [visibleSongs, setVisibleSongs] = useState<Song[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (allSongs.length >= 3) {
@@ -24,6 +26,7 @@ export default function SongsScreen() {
       const left = (currentIndex - 1 + total) % total;
       const center = currentIndex % total;
       const right = (currentIndex + 1) % total;
+      setIsLoading(false);
       setVisibleSongs([allSongs[left], allSongs[center], allSongs[right]]);
     }
   }, [allSongs, currentIndex]);
@@ -35,13 +38,17 @@ export default function SongsScreen() {
       setAllSongs(JSON.parse(cachedSongs));
       setAllThemes(JSON.parse(cachedThemes));
     }
-  }, [allSongs]);
+  }, [allSongs, setAllSongs, setAllThemes]);
 
   useEffect(() => {
     if (visibleSongs.length === 3) {
       setSelectedSong(visibleSongs[1]);
     }
   }, [visibleSongs, setSelectedSong]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-start relative bg-custom-radial">

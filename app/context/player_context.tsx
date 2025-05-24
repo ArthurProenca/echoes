@@ -1,100 +1,101 @@
 "use client";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 
 type PlayerContextType = {
-  setUrl: (url: string) => void;
-  isLoaded: boolean;
-  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
-  url: string;
-  onEnded: (callback: () => void) => void;  // função para registrar callback de fim de música
+  preloadUrl: (url: string) => Promise<boolean>;
+  playPreloadedUrl: () => void;
+  stop: () => void;
+  onEnded: (callback: () => void) => () => void;
 };
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [url, setUrlState] = useState<string>("");
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // Armazena callbacks para "ended"
   const endedCallbacks = useRef<(() => void)[]>([]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     audioRef.current = new Audio();
 
     const audio = audioRef.current;
 
-    const onCanPlayThrough = () => {
-      setIsLoaded(true);
-    };
-
-    const onEnded = () => {
-      // Quando áudio terminar, chama todos os callbacks registrados
+    const handleEnded = () => {
       endedCallbacks.current.forEach((cb) => cb());
     };
 
-    audio.addEventListener("canplaythrough", onCanPlayThrough);
-    audio.addEventListener("ended", onEnded);
+    audio.addEventListener("ended", handleEnded);
 
     return () => {
       audio.pause();
       audio.src = "";
-      audio.removeEventListener("canplaythrough", onCanPlayThrough);
-      audio.removeEventListener("ended", onEnded);
+      audio.removeEventListener("ended", handleEnded);
       endedCallbacks.current = [];
     };
   }, []);
 
-  const setUrl = (newUrl: string) => {
-    if (!audioRef.current) return;
+  const preloadUrl = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (!audioRef.current) return resolve(false);
 
-    if (newUrl === "stop") {
-      audioRef.current.pause();
-      setIsLoaded(false);
-      setUrlState("");
-      return;
-    }
+      const audio = audioRef.current;
+      audio.src = url;
+      audio.preload = "auto";
 
-    if (url === newUrl) {
-      // Mesma url, já tocando
-      return;
-    }
+      const handleCanPlayThrough = () => {
+        audio.removeEventListener("canplaythrough", handleCanPlayThrough);
+        resolve(true);
+      };
 
-    setIsLoaded(false);
-    setUrlState(newUrl);
+      const timeout = setTimeout(() => {
+        audio.removeEventListener("canplaythrough", handleCanPlayThrough);
+        resolve(false);
+      }, 5000);
 
-    audioRef.current.src = newUrl;
-    audioRef.current.load();
-
-    audioRef.current.play().catch((err) => {
-      console.warn("Erro ao tentar tocar:", err);
-      setIsLoaded(false);
+      audio.addEventListener("canplaythrough", () => {
+        clearTimeout(timeout);
+        handleCanPlayThrough();
+      });
     });
   };
 
-  // Função para registrar callback do evento ended
+  const playPreloadedUrl = () => {
+    const audio = audioRef.current;
+    if (audio?.src) {
+      audio.play().catch((err) => {
+        console.warn("Erro ao tocar áudio:", err);
+      });
+    }
+  };
+
+  const stop = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  };
+
   const onEnded = (callback: () => void) => {
     endedCallbacks.current.push(callback);
-    // Opcional: retornar função para remover o callback depois
     return () => {
-      endedCallbacks.current = endedCallbacks.current.filter((cb) => cb !== callback);
+      endedCallbacks.current = endedCallbacks.current.filter(
+        (cb) => cb !== callback
+      );
     };
   };
 
   return (
-    <PlayerContext.Provider value={{ setUrl, isLoaded, audioRef, url, onEnded }}>
+    <PlayerContext.Provider
+      value={{ preloadUrl, playPreloadedUrl, stop, onEnded }}
+    >
       {children}
     </PlayerContext.Provider>
   );
 };
 
-export const usePlayer = () => {
+export const usePlayer = (): PlayerContextType => {
   const context = useContext(PlayerContext);
   if (!context) {
     throw new Error("usePlayer deve ser usado dentro do PlayerProvider");

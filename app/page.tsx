@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import SongsClient from "./client/lambda/songs/songs_client";
 import SingButton from "./components/sing_button";
 import { useSongs } from "./context/songs_context";
 import { useTheme } from "./context/theme_context";
+import Loading from "./components/loading";
 
 async function getAllSongsInfo(): Promise<MusicLibrary> {
   const client = new SongsClient();
@@ -17,6 +18,7 @@ export default function Home() {
   const router = useRouter();
   const { setAllSongs } = useSongs();
   const { setAllThemes } = useTheme();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function loadSongs() {
     const data = await getAllSongsInfo();
@@ -44,6 +46,7 @@ export default function Home() {
             demoUrl: trackTypes["corte"] || trackTypes["demo"] || "",
             instrumentalUrl: trackTypes["instrumental"] || "",
             vocalUrl: trackTypes["vocal"] || "",
+            lyricsUrl: album?.lyrics?.publicUrl || "",
           });
         });
       });
@@ -53,12 +56,16 @@ export default function Home() {
     setAllThemes(data.themes);
     sessionStorage.setItem("songs", JSON.stringify(songs));
     sessionStorage.setItem("themes", JSON.stringify(data.themes));
+    setIsLoading(false);
   }
 
   useEffect(() => {
     loadSongs();
-  }, []);
+  });
 
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <main className="h-screen flex flex-row items-center justify-center relative overflow-hidden p-14">
       <section className="w-full h-full">

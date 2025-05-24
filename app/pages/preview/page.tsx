@@ -1,41 +1,57 @@
 "use client";
 
 import BackscreenButton from "@/app/components/backscreen_button";
+import Loading from "@/app/components/loading";
 import SingButton from "@/app/components/sing_button";
 import { usePlayer } from "@/app/context/player_context";
 import { useSongs } from "@/app/context/songs_context";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 function PreviewSongPage() {
   const { selectedSong } = useSongs();
-  const { setUrl } = usePlayer();
+  const { playPreloadedUrl, preloadUrl, stop } = usePlayer();
   const router = useRouter();
+  const [lyric, setLyrics] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (!selectedSong?.lyricsUrl) return;
+    fetch(selectedSong.lyricsUrl)
+      .then((res) => res.text())
+      .then((text) => {
+        setLyrics(text.replace(/([a-z])([A-Z])/g, "$1\n$2"));
+        preloadUrl(selectedSong.demoUrl).then((res) => {
+          if (res) {
+            setIsLoading(false);
+            playPreloadedUrl();
+          }
+        });
+      })
+      .catch((err) => console.error("Failed to fetch lyrics:", err));
+  }, [
+    selectedSong?.lyricsUrl,
+    playPreloadedUrl,
+    preloadUrl,
+    selectedSong?.demoUrl,
+  ]);
 
   if (!selectedSong) {
     return;
   }
-
-  const rawLyrics = `
-Baby, you can find me under the lights
-Diamonds under my eyes
-Turn the rhythm up, don't you wanna just
-Come along for the ride?
-Ooh, my outfit so tight
-You can see my heartbeat tonight
-I can take the heat, baby, best believe
-That's the moment I shine
-'Cause every romance shakes and it bendsDon't give a damn
-When the night's here, I don't do tears
-Baby, no chance
-`;
-  const formatted = rawLyrics.replace(/([a-z])([A-Z])/g, "$1\n$2");
-
   const handleClick = () => {
-    setUrl("stop");
-    router.push(`/pages/echoes`);
+    stop();
+    preloadUrl(selectedSong.vocalUrl).then((res) => {
+      if (res) {
+        router.push(`/pages/echoes`);
+      }
+    });
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <main className="max-h-screen flex flex-row items-center justify-between relative overflow-hidden p-14 bg-custom-radial">
@@ -65,8 +81,8 @@ Baby, no chance
           </span>
         </section>
         <section className="w-full">
-          <p className="whitespace-pre-line font-instrument-sans text-3xl text-end">
-            {formatted}
+          <p className="whitespace-pre-line font-instrument-sans text-2xl text-end">
+            {lyric}
           </p>
         </section>
         <section

@@ -2,11 +2,13 @@
 
 import AnalyserClient from "@/app/client/lambda/songs/analyser_client";
 import BackscreenButton from "@/app/components/backscreen_button";
+import Loading from "@/app/components/loading";
 import { usePlayer } from "@/app/context/player_context";
 import { useSongs } from "@/app/context/songs_context";
 import { useTheme } from "@/app/context/theme_context";
+import { useRecorder } from "@/app/hooks/useRecorder";
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 async function sendAudioToAnalyse(audio: Blob, vocalUrl: string) {
   const analyserClient = new AnalyserClient();
@@ -14,111 +16,56 @@ async function sendAudioToAnalyse(audio: Blob, vocalUrl: string) {
 }
 
 function Echoes() {
-  const { setUrl, isLoaded, onEnded } = usePlayer();
+  const { playPreloadedUrl, onEnded } = usePlayer();
   const { selectedSong } = useSongs();
   const { getRandomTheme } = useTheme();
+
   const [theme, setTheme] = useState<Theme>();
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [gifLoaded, setGifLoaded] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const [isRecording, setIsRecording] = useState(false);
-  const hasStartedRecordingRef = useRef(false);
+  const [allLoaded, setAllLoaded] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<EchoeAnalyse>();
   const [modalVisible, setModalVisible] = useState(false);
+
+  const { start, stop } = useRecorder({
+    onStop: async (audioBlob) => {
+      const audioUrl = URL.createObjectURL(audioBlob);
+      console.log("Áudio gravado (URL):", audioUrl);
+
+      if (selectedSong?.vocalUrl) {
+        try {
+          const res = await sendAudioToAnalyse(
+            audioBlob,
+            selectedSong.vocalUrl
+          );
+          setAnalysisResult(res);
+          setModalVisible(true);
+        } catch (err) {
+          console.error("Erro ao enviar para análise:", err);
+        }
+      }
+    },
+  });
 
   useEffect(() => {
     setTheme(getRandomTheme());
   }, [getRandomTheme]);
 
   useEffect(() => {
-    if (videoLoaded && gifLoaded && isLoaded && selectedSong?.instrumentalUrl) {
-      setUrl(selectedSong.instrumentalUrl);
+    if (gifLoaded && videoLoaded) {
+      setAllLoaded(true);
+      playPreloadedUrl();
+      start(); // inicia gravação quando tudo carregar
     }
-  }, [videoLoaded, gifLoaded, isLoaded, selectedSong, setUrl]);
-
-  useEffect(() => {
-    if (
-      selectedSong &&
-      videoLoaded &&
-      gifLoaded &&
-      selectedSong.instrumentalUrl
-    ) {
-      setUrl(selectedSong.instrumentalUrl);
-    }
-  }, [selectedSong, setUrl, videoLoaded, gifLoaded]);
-
-  const isLoading = !videoLoaded || !gifLoaded || !isLoaded;
-
-  useEffect(() => {
-    if (!isLoading && !hasStartedRecordingRef.current) {
-      const startRecording = async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorderRef.current = mediaRecorder;
-          audioChunksRef.current = [];
-
-          mediaRecorder.ondataavailable = (event) => {
-            audioChunksRef.current.push(event.data);
-          };
-
-          mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunksRef.current, {
-              type: "audio/wav",
-            });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            console.log("Áudio gravado (URL):", audioUrl + isRecording);
-            audioChunksRef.current = [];
-
-            try {
-              if (selectedSong?.demoUrl) {
-                const res = await sendAudioToAnalyse(
-                  audioBlob,
-                  selectedSong.instrumentalUrl
-                );
-                setAnalysisResult(res);
-                setModalVisible(true);
-              }
-            } catch (err) {
-              console.error("Erro ao enviar para análise:", err);
-            }
-          };
-
-          mediaRecorder.start();
-          setIsRecording(true);
-          hasStartedRecordingRef.current = true;
-        } catch (err) {
-          console.error("Erro ao acessar microfone:", err);
-        }
-      };
-
-      startRecording();
-    }
-  }, [isLoading, selectedSong?.demoUrl]);
-
-  const stopRecording = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
-    ) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream
-        .getTracks()
-        .forEach((track) => track.stop());
-      setIsRecording(false);
-    }
-  };
+  }, [gifLoaded, videoLoaded, playPreloadedUrl, start]);
 
   useEffect(() => {
     onEnded(() => {
-      stopRecording();
+      stop(); // para gravação quando a música termina
     });
-  }, [onEnded]);
+  }, [onEnded, stop]);
 
-  if (selectedSong && (!selectedSong.gifUrl || !selectedSong.instrumentalUrl)) {
+  if (selectedSong && (!selectedSong.gifUrl || !selectedSong.vocalUrl)) {
     return (
       <main className="flex items-center justify-center h-screen bg-black">
         <p className="text-white">Você não selecionou</p>
@@ -145,19 +92,9 @@ function Echoes() {
           />
         )}
 
-        {isLoading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-20">
-            <Image
-              width={40}
-              height={40}
-              alt=""
-              src="/main_page_icon.svg"
-              className="animate-spin"
-            />
-          </div>
-        )}
+        {!allLoaded && <Loading />}
 
-        <section className="flex w-full justify-end z-30">
+        <section className="flex w-full justify-end z-30" onClick={stop}>
           <BackscreenButton />
         </section>
 

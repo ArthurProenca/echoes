@@ -22,11 +22,16 @@ declare global {
     publicUrl: string;
   }
 
+  interface Lyric {
+    publicUrl: string;
+  }
+
   interface Album {
     name: string;
     cover: Cover;
     tracks: Track[];
     gif: Gif;
+    lyrics: Lyric;
   }
 
   interface Artist {
@@ -56,6 +61,7 @@ declare global {
     gifUrl: string;
     artistName: string;
     albumName: string;
+    lyricsUrl;
   }
 
   interface EchoeAnalyse {
